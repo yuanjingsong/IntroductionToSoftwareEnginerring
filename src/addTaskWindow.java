@@ -34,10 +34,13 @@ public class addTaskWindow extends JFrame {
         setTitle("添加任务");
         setSize(300,200);
         setLocation(600,300);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setVisible(true);
     }
     public void init (addTaskWindow window){
-
+        addTaskButton addTaskButton = new addTaskButton(window);
+        window.Confirm.addActionListener(addTaskButton);
+        Cancel  cancel = new Cancel(window);
+        window.Cancel.addActionListener(cancel);
     }
 }
