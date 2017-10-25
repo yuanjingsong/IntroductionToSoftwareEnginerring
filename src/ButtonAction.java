@@ -1,4 +1,6 @@
 
+import javafx.scene.layout.Pane;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
@@ -56,8 +58,8 @@ class Login implements ActionListener {
         try {
             if (sqlConnection.Login(connection, user, password)) {
                 sqlConnection.UserLogin(connection,user);
-                panelWindow = new PanelWindow();
-                panelWindow.init(panelWindow);
+                MainWindow mainWindow = new MainWindow();
+                mainWindow.init(mainWindow);
                 window.dispose();
             } else {
                 JOptionPane.showMessageDialog(null, "用户名或密码错误", "WRONG", JOptionPane.ERROR_MESSAGE);
@@ -66,8 +68,6 @@ class Login implements ActionListener {
             e1.printStackTrace();
         }
     }
-
-
 }
 class Confirm implements ActionListener{
     RegisterWindow registerWindow;
@@ -213,7 +213,11 @@ class setTimer implements ActionListener{
 class showUserInfo implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent e) {
-        UserWindow usrwindow = new UserWindow();
+        try {
+            UserWindow usrwindow = new UserWindow();
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+        }
     }
 }
 class openTimeWindows implements ActionListener{
@@ -235,6 +239,51 @@ class addMin implements ActionListener {
             PanelWindow.user.changeMin(setTimer.time);
         } catch (SQLException e1) {
             e1.printStackTrace();
+        }
+    }
+}
+class showFinish implements ActionListener {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        try {
+            finishWindow finishWindow = new finishWindow();
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+        }
+    }
+}
+class showPanelWindow implements ActionListener{
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        try {
+            PanelWindow window = new PanelWindow();
+            window.init(window);
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+        }
+    }
+}
+class finishTask implements ActionListener {
+    static JTable jTable;
+    static DefaultTableModel tableModel;
+
+    finishTask(DefaultTableModel tableModel, JTable table) {
+       this.tableModel = tableModel;
+       this.jTable = table;
+    }
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        int selectedRow = jTable.getSelectedRow();
+        int response = JOptionPane.showConfirmDialog(null,"确认完成","完成任务",JOptionPane.YES_NO_CANCEL_OPTION);
+        if(response == 0) {
+            try {
+                String taskName = (String) tableModel.getValueAt(selectedRow,0);
+                PanelWindow.user.finishTask(taskName);
+                PanelWindow.defaultTableModel.removeRow(selectedRow);
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
         }
     }
 }

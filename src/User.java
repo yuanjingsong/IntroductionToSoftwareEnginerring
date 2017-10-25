@@ -11,15 +11,17 @@ public class User {
     private int hours;
     private int minutes;
     private int task_total;
+    private int task_finished;
     private int taskDayNum;
     private int taskWeeklyNum;
     private int taskMonthlyNum;
     private groupnumber role [];
     User (){};
-    User (String username, int task_total, int minutes) {
+    User (String username, int task_total, int minutes, int finished) {
         this.username = username;
         this.task_total = task_total;
         this.minutes = minutes;
+        this.task_finished = finished;
     }
     public String getUsername() {
        return username;
@@ -28,11 +30,18 @@ public class User {
         return task_total;
     }
 
+    public int getTask_finished() {
+        return task_finished;
+    }
 
     public int getMinutes() {
         return minutes;
     }
 
+    public void finishTask(String taskName) throws SQLException {
+       Connection connection = sqlConnection.getConnection();
+       sqlConnection.finishTask(connection, taskName);
+    }
 
     public void changeMin (int minutes) throws SQLException {
         this.minutes += minutes;
@@ -48,7 +57,6 @@ public class User {
         connection = sqlConnection.getConnection();
         sqlConnection.addTask(connection, task, taskId);
         connection = sqlConnection.getConnection();
-        System.out.println("add Task total is" + task_total);
         sqlConnection.upsetTaskTotal(connection, username , task_total);
     }
     public void addTaskGroup (Task task, String groupname) {

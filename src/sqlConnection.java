@@ -1,7 +1,9 @@
 
 import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.glassfish.external.statistics.annotations.Reset;
 import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
+import java.lang.management.ManagementFactory;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -111,8 +113,9 @@ public class sqlConnection {
         String TaskDetails = task.getDescription();
         String TaskName = task.getName();
         String TaskTag = task.getTag();
-        String sql = "INSERT INTO task (id, name, description, tag) VALUES (" + Taskid + "," + "\"" + TaskName + "\"," +
-                "\"" + TaskDetails + "\"," + "\"" + TaskTag + "\")";
+        String sql = "INSERT INTO task (id, name, description, tag, finish) VALUES (" + Taskid + "," + "\"" + TaskName + "\"," +
+                "\"" + TaskDetails + "\"," + "\"" + TaskTag + "\",0)";
+        System.out.println(sql);
         boolean results = statement.executeUpdate(sql) == 1 ? true : false;
         if (!results) {
             System.out.println("WRONG");
@@ -207,7 +210,7 @@ public class sqlConnection {
         }
         for (int i = 0; i < task_name.size(); i++) {
             int id = task_name.get(i);
-            sql = "SELECT id, name, description, tag from task WHERE id = \"" + id + "\"";
+            sql = "SELECT id, name, description, tag from task WHERE id = \"" + id + "\" AND finish <> 1";
             rs= statement.executeQuery(sql);
             if(rs.next()){
                 Task newTask = new Task(rs.getInt("id"),rs.getString("name"),rs.getString("description"),rs.getString("tag"));
@@ -233,19 +236,63 @@ public class sqlConnection {
     public static User getUser(Connection connection, String username) throws SQLException {
         User user = null;
         Statement statement = connection.createStatement();
-        String sql = "select username, task_total, minutes from `user` where username = \""
+        String sql = "select username, task_total, minutes ,finished from `user` where username = \""
                 + username + "\"";
         ResultSet rs = statement.executeQuery(sql);
         if(rs.next()) {
-            user = new User(username, rs.getInt("task_total"), rs.getInt("minutes"));
+            user = new User(username, rs.getInt("task_total"), rs.getInt("minutes"), rs.getInt("finished"));
         }
         return user;
     }
     public static void updateMinutes (Connection connection, int minutes ) throws SQLException {
         Statement statement = connection.createStatement();
-        String sql = "update `user` set minutes = " + minutes + " where username = \"" + PanelWindow.username + "\"";
+        String sql = "update `user` set minutes = " + minutes + " where username = \"" + MainWindow.username + "\"";
         System.out.println(sql);
         statement.executeUpdate(sql);
         connection.close();
+    }
+    public static void finishTask(Connection connection, String taskName) throws SQLException {
+        Statement statement = connection.createStatement();
+        String sql = "select finished from `user` where username = \"" +  MainWindow.username + "\"";
+        ResultSet rs = statement.executeQuery(sql);
+        int tasks = -1;
+        if(rs.next()) {
+            tasks = rs.getInt("finished");
+        }
+        tasks++;
+        sql = "update `user` set finished = " + tasks + " where username = \"" + MainWindow.username + "\"";
+        statement.executeUpdate(sql);
+        sql = "SELECT id from task_member where member_name = \"" + MainWindow.username + "\" AND task_name = \"" + taskName + "\"";
+        rs = statement.executeQuery(sql);
+        int task_id = 0;
+        if(rs.next()) {
+           task_id= rs.getInt("id");
+        }
+        sql = "update task set finish = 1 where id = " + task_id  ;
+        System.out.println(sql);
+        statement.executeUpdate(sql);
+        connection.close();
+    }
+    public static int getUserTaskTotal (Connection connection, String username) throws SQLException {
+        Statement statement = connection.createStatement();
+        String sql = "select task_total from `user` where username = \"" + username + "\"";
+        System.out.println(sql);
+        ResultSet rs =  statement.executeQuery(sql);
+        int taskTotal = 0;
+        if(rs.next()) {
+           taskTotal = rs.getInt("task_total");
+        }
+        return taskTotal;
+    }
+    public static int getUserTaskFinished (Connection connection, String username) throws SQLException {
+        Statement statement = connection.createStatement();
+        String sql = "select finished from `user` where username = \""  + username + "\"";
+        System.out.println(sql);
+        ResultSet rs = statement.executeQuery(sql);
+        int taskFinished = 0;
+        if(rs.next()) {
+            taskFinished = rs.getInt("finished");
+        }
+        return taskFinished;
     }
 }

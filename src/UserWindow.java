@@ -1,16 +1,21 @@
+import sun.applet.Main;
+
 import javax.swing.*;
 import java.awt.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class UserWindow extends JFrame{
     JPanel jp1,jp2,jp3;
-    JLabel Username, TaskTotal, Time, showUsername, showTaskTotal,showTime;
-    UserWindow () {
+    JLabel Username, TaskTotal, Time, showUsername, showTaskTotal,showTime ;
+    UserWindow () throws SQLException {
         Username = new JLabel("用户名");
         Time = new JLabel("专心时长");
         TaskTotal = new JLabel("任务总数");
-        String username = PanelWindow.user.getUsername();
-        int time = PanelWindow.user.getMinutes();
-        int tasktotal =  PanelWindow.user.getTask_total();
+        String username = MainWindow.user.getUsername();
+        int time = MainWindow.user.getMinutes();
+        Connection connection = sqlConnection.getConnection();
+        int tasktotal = sqlConnection.getUserTaskTotal(connection, MainWindow.username);
         showUsername = new JLabel(username);
         showTime = new JLabel( "您已经专注"+time + "分钟");
         showTaskTotal = new JLabel(String.valueOf(tasktotal));
